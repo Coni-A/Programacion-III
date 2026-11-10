@@ -1,14 +1,17 @@
 import java.util.ArrayList;
 import java.util.HashSet;
 
+// Guarda como se encuentra UADA en un punto de la exploracion.
 public class Estado {
 
     private Lugar actual;
     private double tiempo;
     private double bateria;
+    // Los visitados evitan repetir estaciones y el camino conserva cada movimiento.
     private HashSet<Lugar> visitados;
     private ArrayList<Paso> camino;
 
+    // Constructor del estado inicial, con la estacion actual, tiempo y bateria.
     public Estado(Lugar actual, double tiempo, double bateria) {
 
         this.actual = actual;
@@ -64,10 +67,12 @@ public class Estado {
         this.bateria = bateria;
     }
 
+    // Marca una estacion como utilizada para que no se vuelva a recorrer.
     public void agregarVisitado(Lugar lugar) {
         visitados.add(lugar);
     }
 
+    // Agrega al historial el movimiento realizado.
     public void agregarPaso(Paso paso) {
         camino.add(paso);
     }

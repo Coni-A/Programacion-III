@@ -1,20 +1,24 @@
-
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 
+// Busca el tramo mas corto entre dos estaciones. No valida bateria ni ventanas.
 public class Dijkstra {
 
     private Grafo grafo;
 
+    // Recibe el mapa sobre el que va a buscar caminos.
     public Dijkstra(Grafo grafo) {
         this.grafo = grafo;
     }
 
+    // Busca un tramo de tiempo minimo entre origen y destino.
+    // Los caminos propuestos se validan despues, antes de usarlos en una ruta.
     public TramoDijkstra buscar(Lugar origen, Lugar destino,
                                 HashSet<Lugar> visitadosRuta) {
 
+        // Guardamos los tiempos minimos conocidos y como se llego a cada lugar.
         HashMap<Lugar, Double> distancias = new HashMap<>();
         HashMap<Lugar, Lugar> anteriores = new HashMap<>();
         HashMap<Lugar, Conexion> conexionesAnteriores = new HashMap<>();
@@ -38,6 +42,7 @@ public class Dijkstra {
             Lugar actual = null;
             double menor = Double.POSITIVE_INFINITY;
 
+            // Elegimos el lugar pendiente con la menor distancia conocida.
             for (Lugar lugar : grafo.getLugares().values()) {
 
                 if (!fijados.contains(lugar)
@@ -146,11 +151,13 @@ public class Dijkstra {
         }
 
         // Invertir para obtener el orden origen -> destino.
+        // Reconstruimos hacia atras, por eso al final invertimos los pasos.
         Collections.reverse(pasos);
 
         return new TramoDijkstra(pasos, distancias.get(destino));
     }
 
+    // Obtiene el costo de cada modo para comparar las conexiones.
     private double calcularTiempo(Conexion conexion, char modo) {
 
         switch (modo) {
@@ -168,3 +175,4 @@ public class Dijkstra {
         }
     }
 }
+

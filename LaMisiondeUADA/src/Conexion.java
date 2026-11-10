@@ -1,3 +1,4 @@
+// Representa una conexion dirigida, con su tiempo base y movimientos permitidos.
 public class Conexion {
 
     private Lugar origen;
@@ -5,6 +6,7 @@ public class Conexion {
     private int segundos;
     private String modos;
 
+    // Guarda el sentido de la conexion y los movimientos habilitados.
     public Conexion(Lugar origen, Lugar destino, int segundos, String modos) {
 
         this.origen = origen;
@@ -29,7 +31,9 @@ public class Conexion {
         return modos;
     }
 
+    // Comprueba si la conexion admite el modo indicado.
     public boolean permiteModo(char modo) {
         return modos.indexOf(modo) != -1;
     }
 }
+

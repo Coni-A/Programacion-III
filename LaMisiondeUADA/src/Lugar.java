@@ -1,3 +1,5 @@
+
+// Representa una estacion con su ubicacion y las restricciones que le correspondan.
 public class Lugar {
 
     private String nombre;
@@ -7,6 +9,7 @@ public class Lugar {
     private boolean obligatorio;
     private boolean prohibido;
 
+    // Guarda los datos de una estacion tal como se leen del archivo.
     public Lugar(String nombre, int numeroAula, int x, int y, boolean obligatorio, boolean prohibido) {
 
         this.nombre = nombre;
@@ -41,7 +44,9 @@ public class Lugar {
         return prohibido;
     }
 
+    // Las aulas tienen un numero mayor a cero y permiten recargar bateria.
     public boolean esAula() {
         return numeroAula > 0;
     }
 }
+

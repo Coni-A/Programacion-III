@@ -2,18 +2,21 @@
 import java.util.ArrayList;
 import java.util.HashMap;
 
+// Calcula las distancias minimas entre todos los pares de lugares del mapa.
 public class DistanciasFloyd {
 
     private ArrayList<Lugar> lugares;
     private HashMap<String, Integer> indices;
     private double[][] distancias;
 
+    // Crea la matriz de distancias y relaciona cada lugar con su indice.
     public DistanciasFloyd(Grafo grafo) {
 
         lugares = new ArrayList<>(grafo.getLugares().values());
         indices = new HashMap<>();
 
         int cantidad = lugares.size();
+        // Cada posicion de la matriz representa el costo de ir de un lugar a otro.
         distancias = new double[cantidad][cantidad];
 
         // Asociamos cada lugar con una posición de la matriz.
@@ -24,6 +27,7 @@ public class DistanciasFloyd {
         calcular(grafo);
     }
 
+    // Ejecuta Floyd para buscar caminos mas cortos pasando por estaciones intermedias.
     private void calcular(Grafo grafo) {
 
         int cantidad = lugares.size();
@@ -117,3 +121,4 @@ public class DistanciasFloyd {
         return distancias[i][j];
     }
 }
+

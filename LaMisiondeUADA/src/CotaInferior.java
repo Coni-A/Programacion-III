@@ -1,13 +1,14 @@
-
 import java.util.ArrayList;
 import java.util.HashSet;
 
+// Calcula la cota inferior con Prim usando las distancias preparadas por Floyd.
 public class CotaInferior {
 
     private Grafo grafo;
     private DistanciasFloyd floyd;
     private HashSet<Lugar> obligatorios;
 
+    // Prepara el conjunto de lugares obligatorios para usarlo en cada estado.
     public CotaInferior(Grafo grafo, DistanciasFloyd floyd) {
 
         this.grafo = grafo;
@@ -23,9 +24,12 @@ public class CotaInferior {
         }
     }
 
+    // Aplica Prim sobre el lugar actual, los obligatorios pendientes y el inicio.
+    // El resultado es una estimacion optimista y no un recorrido real.
     public double calcularCI(Estado estado) {
 
         // 1. Obtener los lugares obligatorios pendientes.
+        // Solo nos interesan los objetivos que todavia faltan visitar.
         HashSet<Lugar> pendientes = new HashSet<>(obligatorios);
         pendientes.removeAll(estado.getVisitados());
 
@@ -39,6 +43,7 @@ public class CotaInferior {
         }
 
         // 3. Inicializar Prim.
+        // Prim empieza en la posicion actual y va conectando los lugares necesarios.
         ArrayList<Lugar> conectados = new ArrayList<>();
         conectados.add(estado.getActual());
 
@@ -62,6 +67,7 @@ public class CotaInferior {
                     double ida = floyd.obtenerDistancia(a, b);
                     double vuelta = floyd.obtenerDistancia(b, a);
 
+                    // Para esta estimacion se usa el menor sentido, aunque el grafo real sea dirigido.
                     double costo = Math.min(ida, vuelta);
 
                     if (costo < menorCosto) {
@@ -84,3 +90,4 @@ public class CotaInferior {
         return estado.getTiempo() + costoARM;
     }
 }
+

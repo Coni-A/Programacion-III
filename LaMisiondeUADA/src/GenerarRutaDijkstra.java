@@ -1,20 +1,23 @@
-
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 
+// Intenta armar un recorrido completo a partir de tramos cortos de Dijkstra.
 public class GenerarRutaDijkstra {
 
     private Grafo grafo;
     private ValidarMovimiento mover;
     private Dijkstra dijkstra;
 
+    // Prepara Dijkstra y el validador para armar una ruta tentativa.
     public GenerarRutaDijkstra(Grafo grafo, ValidarMovimiento mover) {
         this.grafo = grafo;
         this.mover = mover;
         this.dijkstra = new Dijkstra(grafo);
     }
 
+    // Va buscando los obligatorios pendientes y finalmente intenta regresar al inicio.
+    // Si algun tramo no se puede realizar, devuelve null y sigue el Backtracking normal.
     public Estado generarRuta() {
 
         // 1. Crear el estado inicial
@@ -25,6 +28,7 @@ public class GenerarRutaDijkstra {
         );
 
         // 2. Mientras queden lugares obligatorios
+        // Buscamos el obligatorio mas cercano entre los que todavia faltan.
         while (!todosObligatoriosVisitados(estado)) {
 
             ArrayList<CandidatoDijkstra> candidatos =
@@ -74,6 +78,7 @@ public class GenerarRutaDijkstra {
 
             boolean avanzo = false;
 
+            // Antes de aceptar un tramo lo probamos con las restricciones reales.
             // 5. Intentar los candidatos en orden
             for (CandidatoDijkstra candidato : candidatos) {
 
@@ -121,6 +126,7 @@ public class GenerarRutaDijkstra {
         return null;
     }
 
+    // Prueba los movimientos del tramo uno por uno, con bateria y horarios.
     private Estado simularTramo(
             Estado estadoActual,
             TramoDijkstra tramo
@@ -146,6 +152,7 @@ public class GenerarRutaDijkstra {
         return estado;
     }
 
+    // Comprueba si ya se cumplieron todos los objetivos obligatorios.
     private boolean todosObligatoriosVisitados(Estado estado) {
 
         for (Lugar lugar : grafo.getLugares().values()) {
@@ -160,3 +167,4 @@ public class GenerarRutaDijkstra {
         return true;
     }
 }
+

@@ -1,6 +1,8 @@
+
 import java.util.ArrayList;
 import java.util.HashSet;
 
+// Controla las reglas de cada movimiento antes de crear un nuevo estado.
 public class ValidarMovimiento {
 
     private Grafo grafo;
@@ -9,6 +11,7 @@ public class ValidarMovimiento {
 
     private final double CAPACIDAD_BATERIA = 100;
 
+    // Reune los lugares obligatorios y prohibidos para validarlos mas rapido.
     public ValidarMovimiento(Grafo grafo) {
 
         this.grafo = grafo;
@@ -29,6 +32,7 @@ public class ValidarMovimiento {
     }
 
     // 1. Calcular tiempo según el movimiento
+    // Caminando tarda el tiempo base, saltando la mitad y patas arriba el doble.
     public double calcularTiempo(Conexion conexion, char modo) {
 
         switch (modo) {
@@ -48,6 +52,7 @@ public class ValidarMovimiento {
     }
 
     // 2. Calcular consumo de batería
+    // Calcula el gasto de bateria tomando como base el tiempo caminando en minutos.
     public double calcularConsumo(Conexion conexion, char modo) {
 
         double consumoBase = conexion.getSegundos() / 60.0;
@@ -69,6 +74,7 @@ public class ValidarMovimiento {
     }
 
     // 3. Comprobar si un lugar está cerrado
+    // Comprueba si UADA llegaria durante el cierre de esa estacion.
     public boolean estaCerrado(Lugar lugar, double tiempo) {
 
         for (Ventana ventana : grafo.getVentanas()) {
@@ -85,6 +91,7 @@ public class ValidarMovimiento {
     }
 
     // 4. Calcular la suma de los dígitos del número de aula
+    // Se usa para calcular la recarga de bateria al llegar a un aula.
     public int sumaDigitos(int numero) {
 
         int suma = 0;
@@ -99,12 +106,14 @@ public class ValidarMovimiento {
     }
 
     // 5. Comprobar si se visitaron todos los lugares obligatorios
+    // Comprueba si ya se visitaron todas las estaciones obligatorias.
     public boolean todosObligatoriosVisitados(Estado estado) {
 
         return estado.getVisitados().containsAll(obligatorios);
     }
 
     // 6. Comprobar si el recorrido está completo
+    // La ruta debe volver al inicio despues de visitar todos los obligatorios.
     public boolean esSolucionCompleta(Estado estado) {
 
         return estado.getActual() == grafo.getInicio()
@@ -113,12 +122,14 @@ public class ValidarMovimiento {
     }
 
     // 7. Intentar realizar un movimiento
+    // Valida un paso completo y, si sirve, devuelve una copia del estado actualizado.
+    // Si se incumple una regla, devuelve null y Backtracking prueba otro movimiento.
     public Estado intentarAvanzar(Estado nodo, Conexion conexion, char modo) {
 
         Lugar destino = conexion.getDestino();
 
         // Verificar que el movimiento esté permitido
-        if (!conexion.permiteModo(modo)) {
+        if (conexion.getOrigen() != nodo.getActual() || !conexion.permiteModo(modo)) {
             return null;
         }
 
@@ -148,16 +159,17 @@ public class ValidarMovimiento {
         double tiempoTramo = calcularTiempo(conexion, modo);
         double consumoTramo = calcularConsumo(conexion, modo);
 
+        // Actualizamos el tiempo y descontamos el consumo antes de cualquier recarga.
         double nuevoTiempo = nodo.getTiempo() + tiempoTramo;
         double nuevaBateria = nodo.getBateria() - consumoTramo;
 
         // Comprobar batería
-        if (nuevaBateria < 0) {
+        if (nuevaBateria < -1e-9) {
             return null;
         }
 
         // Solo se permite llegar con batería cero al finalizar
-        if (nuevaBateria == 0 && destino != grafo.getInicio()) {
+        if (nuevaBateria <= 1e-9 && destino != grafo.getInicio()) {
             return null;
         }
 
@@ -167,9 +179,10 @@ public class ValidarMovimiento {
         }
 
         // Recargar batería si el destino es un aula
+        // La recarga se aplica al llegar, sin superar las 100 unidades.
         if (destino.esAula()) {
 
-            int recarga = sumaDigitos(destino.getNumeroAula()) / 5;
+            double recarga = sumaDigitos(destino.getNumeroAula()) / 5.0;
 
             nuevaBateria = Math.min(
                     CAPACIDAD_BATERIA,
@@ -178,6 +191,7 @@ public class ValidarMovimiento {
         }
 
         // Crear el nuevo estado
+        // Copiamos el estado para no modificar el camino anterior del Backtracking.
         Estado siguiente = new Estado(nodo);
 
         siguiente.setActual(destino);
