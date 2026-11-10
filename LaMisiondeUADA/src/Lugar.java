@@ -7,8 +7,7 @@ public class Lugar {
     private boolean obligatorio;
     private boolean prohibido;
 
-    public Lugar(String nombre, int numeroAula, int x, int y,
-                 boolean obligatorio, boolean prohibido) {
+    public Lugar(String nombre, int numeroAula, int x, int y, boolean obligatorio, boolean prohibido) {
 
         this.nombre = nombre;
         this.numeroAula = numeroAula;
