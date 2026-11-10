@@ -6,32 +6,173 @@ public class Prueba_Main {
 
         try {
 
-            Grafo grafo = Archivos.cargar("LaMisiondeUADA/mapa.txt");
-            System.out.println("Cantidad de lugares: "
-                    + grafo.getLugares().size());
+            Grafo grafo = Archivos.cargar("Mapa.txt");
 
-            System.out.println("Cantidad de conexiones: "
-                    + grafo.getConexiones().size());
+            ValidarMovimiento mover = new ValidarMovimiento(grafo);
 
-            System.out.println("Cantidad de ventanas: "
-                    + grafo.getVentanas().size());
+            // Crear el estado inicial
+            Estado inicial = new Estado(grafo.getInicio(), 0, 100);
 
-            System.out.println("Lugar de inicio: "
-                    + grafo.getInicio().getNombre());
+            System.out.println("ESTADO INICIAL");
+            System.out.println("Lugar: "
+                    + inicial.getActual().getNombre());
+            System.out.println("Tiempo: "
+                    + inicial.getTiempo());
+            System.out.println("Bateria: "
+                    + inicial.getBateria());
 
-            System.out.println("\nLUGARES OBLIGATORIOS:");
+            Conexion conexionPrueba = null;
 
-            for (Lugar lugar : grafo.getLugares().values()) {
+            for (Conexion conexion : grafo.getConexiones()) {
 
-                if (lugar.esObligatorio()) {
-                    System.out.println(lugar.getNombre());
+                if (conexion.getOrigen() == grafo.getInicio()
+                        && conexion.getDestino().getNombre().equals("Pasillo P3")) {
+
+                    conexionPrueba = conexion;
                 }
             }
 
-        } catch (IOException e) {
+            // Probar el movimiento saltando
+            Estado siguiente = mover.intentarAvanzar(
+                    inicial,
+                    conexionPrueba,
+                    'S'
+            );
 
-            System.out.println("Error al leer el archivo: " + e.getMessage());
+            if (siguiente != null) {
 
+                System.out.println("\nDESPUES DEL MOVIMIENTO");
+
+                System.out.println("Lugar: "
+                        + siguiente.getActual().getNombre());
+
+                System.out.println("Tiempo: "
+                        + siguiente.getTiempo());
+
+                System.out.println("Bateria: "
+                        + siguiente.getBateria());
+
+                System.out.println("Cantidad de pasos: "
+                        + siguiente.getCamino().size());
+
+            } else {
+
+                System.out.println("Movimiento no permitido.");
+            }
+
+
+            DistanciasFloyd floyd = new DistanciasFloyd(grafo);
+
+            Lugar inicio = grafo.getInicio();
+            Lugar starbucks = grafo.buscarLugar("Starbucks");
+            Lugar auditorio = grafo.buscarLugar("Auditorio");
+            Lugar aula613 = grafo.buscarLugar("Aula 613");
+            Lugar molinete = grafo.buscarLugar("Molinete Lima 3");
+
+            System.out.println("\nDISTANCIAS MINIMAS - FLOYD");
+
+            System.out.println("Aula 348 -> Starbucks: "
+                    + floyd.obtenerDistancia(inicio, starbucks));
+
+            System.out.println("Aula 348 -> Auditorio: "
+                    + floyd.obtenerDistancia(inicio, auditorio));
+
+            System.out.println("Aula 348 -> Aula 613: "
+                    + floyd.obtenerDistancia(inicio, aula613));
+
+            System.out.println("Aula 348 -> Molinete Lima 3: "
+                    + floyd.obtenerDistancia(inicio, molinete));
+
+
+            CotaInferior cota = new CotaInferior(grafo, floyd);
+
+            double resultado = cota.calcularCI(inicial);
+
+            System.out.println("\nCOTA INFERIOR - PRIM");
+            System.out.println("Tiempo acumulado: " + inicial.getTiempo());
+            System.out.println("Cota inferior: " + resultado);
+
+
+            Estado sigue = mover.intentarAvanzar(inicial, conexionPrueba, 'C');
+
+            if (sigue != null) {
+                System.out.println("Cota después del movimiento: "
+                        + cota.calcularCI(sigue));
+            }
+
+
+            Dijkstra dijkstra = new Dijkstra(grafo);
+
+            TramoDijkstra tramo = dijkstra.buscar(
+                    grafo.getInicio(),
+                    grafo.buscarLugar("Starbucks"),
+                    inicial.getVisitados()
+            );
+
+            System.out.println("\nRESULTADO DIJKSTRA");
+
+            if (tramo != null) {
+
+                System.out.println("Tiempo estimado: " + tramo.getTiempo());
+
+                for (PasoDijkstra paso : tramo.getPasos()) {
+
+                    Conexion conexion = paso.getConexion();
+
+                    System.out.println(
+                            conexion.getOrigen().getNombre()
+                                    + " -> "
+                                    + conexion.getDestino().getNombre()
+                                    + " | Movimiento: "
+                                    + paso.getModo()
+                    );
+                }
+
+            } else {
+                System.out.println("No se encontro un camino.");
+            }
+
+            GenerarRutaDijkstra generador =
+                    new GenerarRutaDijkstra(grafo, mover);
+
+            Estado solucion = generador.generarRuta();
+
+            if (solucion == null) {
+
+                System.out.println(
+                        "Dijkstra no pudo encontrar una ruta completa."
+                );
+
+            } else {
+
+                System.out.println("Ruta encontrada.");
+                System.out.println(
+                        "Tiempo total: " + solucion.getTiempo()
+                );
+                System.out.println(
+                        "Bateria restante: " + solucion.getBateria()
+                );
+
+                System.out.println("\nRecorrido:");
+
+                for (Paso paso : solucion.getCamino()) {
+
+                    System.out.println(
+                            paso.getOrigen().getNombre()
+                                    + " -> "
+                                    + paso.getDestino().getNombre()
+                                    + " | Modo: "
+                                    + paso.getModo()
+                                    + " | Tiempo acumulado: "
+                                    + paso.getTiempoAcumulado()
+                                    + " | Bateria: "
+                                    + paso.getBateriaRestante()
+                    );
+                }
+            }
+
+        } catch (Exception e) {
+            System.out.println("Error: " + e.getMessage());
         }
     }
 }
